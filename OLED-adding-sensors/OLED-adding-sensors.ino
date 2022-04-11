@@ -15,6 +15,7 @@
 #include <Adafruit_SH110X.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <BH1750.h>
 
 //For Featherwing OLED 128x64
 
@@ -69,6 +70,8 @@ Adafruit_SH1107 display = Adafruit_SH1107(SCREEN_HEIGHT, SCREEN_WIDTH, &Wire);
 // Define the onboard sensor instance
 Adafruit_BME280 bme; // I2C
 unsigned long delayTimeBMESensors;
+//Define the BH1750 light sensor
+BH1750 lightMeter;
 
 void setup() {
 // turn on the I2C power by setting pin to opposite of 'rest state'
@@ -102,7 +105,10 @@ void setup() {
         Serial.print("        ID of 0x61 represents a BME 680.\n");
         while (1) delay(10);
     }
-    delayTimeBMESensors = 1000;
+    delayTimeReadSensors = 1000;
+
+// Start light sensor
+lightMeter.begin();
 
 
   /////////////////////////  OLED display startup ////////////////////////
@@ -131,30 +137,27 @@ void setup() {
 //  display.display();
 //  delay(2000);
 
+  // Display the mars rover bitmap coded in this file
+  display.drawBitmap(0, 0,  marsrover, 64, 64, 1);
 
   // text display tests
   display.setTextSize(1);
   display.setTextColor(SH110X_WHITE, SH110X_BLACK);
   display.setCursor(64,TEXTROWHEIGHT);
-  display.println("HELLO MARS");
+  display.println("Terrarium:");
   display.display(); // actually display all of the above
 }
 
 void loop() {
-
-   
-    delay(delayTimeBMESensors);
-    //display.clearDisplay();
-  // Display the mars rover bitmap coded in this file
-  display.drawBitmap(0, 0,  marsrover, 64, 64, 1);
-  printBMEValues();
+    delay(delayTimeReadSensors);
+    printSensorsValues();
 }
 
 
-void printBMEValues() {
-   display.setCursor(TEXTLEFTCOORDINATE,TEXTROWHEIGHT*2);
-
-
+void printSensorsValues() {
+  
+    display.setTextWrap(false);
+    display.setCursor(TEXTLEFTCOORDINATE,TEXTROWHEIGHT*2);
     float BMEtempRaw = bme.readTemperature();
     display.print("T: ");
     display.print(BMEtempRaw, 0);
@@ -163,43 +166,58 @@ void printBMEValues() {
     Serial.print(BMEtempRaw, 0);
     Serial.println(" °C");
 
-
+    display.setTextWrap(false);
     display.setCursor(TEXTLEFTCOORDINATE,TEXTROWHEIGHT*3);
     float BMEhumidityRaw = (bme.readHumidity());
     int BMEhumidity = roundf(BMEhumidityRaw);
     display.print("H: ");
     display.print(BMEhumidity);
-    display.println(" %");
+    display.println(" %   ");
     Serial.print("Humidity = ");
     Serial.print(BMEhumidity);
-    Serial.println(" %");
+    Serial.println(" %   ");
 
-    
+    display.setTextWrap(false);
     display.setCursor(TEXTLEFTCOORDINATE,TEXTROWHEIGHT*4);
     float BMEpressureRaw = bme.readPressure() ;
     float BMEpressureKPa = (roundf(BMEpressureRaw / 100.0F))/10.0; 
     display.print("P:");
     display.print(BMEpressureKPa, 1);
-    display.println("kPa");
+    display.println("kPa   ");
  
     Serial.print("Pressure = ");
     Serial.print(BMEpressureKPa, 1); 
-    Serial.println("kPa");
+    Serial.println("kPa   ");
 
-
+/*  // This works, but not really interested in this right now.
+    display.setTextWrap(false);
     display.setCursor(TEXTLEFTCOORDINATE,TEXTROWHEIGHT*5);
     float BMEaltitudeEarthRaw = bme.readAltitude(SEALEVELPRESSURE_HPA);
-    int BMEaltitudeEarth = roundf(BMEaltitudeEarthRaw);
+    int BMEaltitudeEarth = roundf(BMEaltitudeEarthRaw / 10.0F) * 10;
     if (BMEaltitudeEarth < 0){  // Clamp altitude on earth to 0 m
       BMEaltitudeEarth = 0;
     }
     
-    display.print("Alt: ");
-    display.println(BMEaltitudeEarth);
+    display.print("A: ");
+    display.print(BMEaltitudeEarth);
+    display.print(" m   ");
 
     Serial.print("Approx. Altitude = ");
     Serial.print(BMEaltitudeEarth);
-    Serial.println(" m");
+    Serial.println(" m    ");
+    */
+
+    display.setTextWrap(false);
+    display.setCursor(TEXTLEFTCOORDINATE,TEXTROWHEIGHT*6);
+    float lux = lightMeter.readLightLevel();
+    int luxTens = roundf(lux / 10.0F) * 10;
+    display.print("L: ");
+    display.print(luxTens);
+    display.println(" lux   ");
+    
+    Serial.print("Light: ");
+    Serial.print(luxTens);
+    Serial.println(" lux   ");
 
 
 
