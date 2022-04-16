@@ -69,7 +69,7 @@ Adafruit_SH1107 display = Adafruit_SH1107(SCREEN_HEIGHT, SCREEN_WIDTH, &Wire);
 
 // Define the onboard sensor instance
 Adafruit_BME280 bme; // I2C
-unsigned long delayTimeBMESensors;
+unsigned long delayTimeReadSensors;
 //Define the BH1750 light sensor
 BH1750 lightMeter;
 
