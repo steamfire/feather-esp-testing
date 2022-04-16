@@ -90,6 +90,8 @@ void setup() {
   
   Serial.println("Mars OLED + Sensors Test");
 
+  netStart(); // Start up the webserver and connect to Wifi
+
   // Sensor setup code
      unsigned status;
     // BME sensor default settings
